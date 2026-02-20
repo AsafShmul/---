@@ -1,2 +1,876 @@
-# ---
-פורטפוליו לדיבוב וקריינות - אסף שמול
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>פורטפוליו קריינות</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Heebo:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1208;
+    --cream: #f5f0e8;
+    --gold: #c9a84c;
+    --warm: #e8dcc8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--ink);
+    color: var(--cream);
+    font-family: 'Heebo', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ===== EDITOR PANEL ===== */
+  #editor-toggle {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 999;
+    background: var(--gold);
+    color: var(--ink);
+    border: none;
+    border-radius: 50px;
+    padding: 12px 22px;
+    font-family: 'Heebo', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    transition: transform 0.2s;
+  }
+  #editor-toggle:hover { transform: scale(1.05); }
+
+  #editor-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 360px;
+    height: 100vh;
+    background: #111;
+    border-right: 1px solid rgba(201,168,76,0.3);
+    z-index: 998;
+    overflow-y: auto;
+    padding: 24px 20px 80px;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  #editor-panel.open { transform: translateX(0); }
+
+  .editor-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: var(--gold);
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(201,168,76,0.25);
+  }
+
+  .editor-section {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+
+  .editor-section-title {
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .field-group label {
+    font-size: 0.75rem;
+    color: rgba(245,240,232,0.5);
+  }
+
+  .field-group input,
+  .field-group textarea {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 4px;
+    color: var(--cream);
+    font-family: 'Heebo', sans-serif;
+    font-size: 0.85rem;
+    padding: 8px 10px;
+    width: 100%;
+    transition: border-color 0.2s;
+    direction: rtl;
+  }
+
+  .field-group input:focus,
+  .field-group textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+  }
+
+  .field-group textarea {
+    resize: vertical;
+    min-height: 70px;
+    line-height: 1.6;
+  }
+
+  .demo-editor-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 4px;
+    padding: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .demo-editor-card .demo-num {
+    font-size: 0.65rem;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .file-upload-area {
+    border: 1.5px dashed rgba(201,168,76,0.4);
+    border-radius: 4px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    position: relative;
+  }
+  .file-upload-area:hover { background: rgba(201,168,76,0.05); }
+  .file-upload-area input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+  .file-upload-area span {
+    font-size: 0.75rem;
+    color: rgba(201,168,76,0.7);
+    pointer-events: none;
+  }
+
+  .skills-editor input {
+    margin-bottom: 6px;
+  }
+
+  .add-demo-btn, .save-btn {
+    width: 100%;
+    padding: 10px;
+    border: 1.5px solid var(--gold);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--gold);
+    font-family: 'Heebo', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 6px;
+  }
+  .add-demo-btn:hover { background: rgba(201,168,76,0.1); }
+
+  .save-btn {
+    background: var(--gold);
+    color: var(--ink);
+    font-weight: 600;
+    margin-top: 16px;
+  }
+  .save-btn:hover { opacity: 0.85; }
+
+  /* ===== PORTFOLIO DISPLAY ===== */
+  #portfolio {
+    transition: margin-left 0.3s ease;
+  }
+  #portfolio.shifted { margin-left: 360px; }
+
+  header {
+    padding: 60px 40px 40px;
+    border-bottom: 1px solid rgba(201,168,76,0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    position: relative;
+  }
+
+  .soundwave-bg {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 0 40px;
+    opacity: 0.15;
+  }
+  .soundwave-bg span {
+    display: block;
+    width: 3px;
+    background: var(--gold);
+    border-radius: 2px;
+    animation: wave 1.4s ease-in-out infinite;
+  }
+  @keyframes wave {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(0.3); }
+  }
+
+  .name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 900;
+    line-height: 1;
+    color: var(--cream);
+    letter-spacing: -1px;
+  }
+  .name span { color: var(--gold); }
+
+  .tagline {
+    font-size: 0.95rem;
+    font-weight: 300;
+    color: rgba(245,240,232,0.6);
+    margin-top: 8px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .contact-bar {
+    display: flex;
+    gap: 24px;
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: rgba(245,240,232,0.5);
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .contact-bar a { color: var(--gold); text-decoration: none; }
+
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 40px;
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(201,168,76,0.3);
+  }
+
+  .demo-grid { display: grid; gap: 16px; margin-bottom: 70px; }
+
+  .demo-card {
+    background: rgba(245,240,232,0.04);
+    border: 1px solid rgba(245,240,232,0.1);
+    border-radius: 4px;
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 20px;
+    transition: border-color 0.3s, background 0.3s;
+  }
+  .demo-card:hover {
+    border-color: rgba(201,168,76,0.4);
+    background: rgba(245,240,232,0.07);
+  }
+
+  .demo-info h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--cream);
+    margin-bottom: 4px;
+  }
+  .demo-info p {
+    font-size: 0.8rem;
+    color: rgba(245,240,232,0.45);
+    font-weight: 300;
+  }
+
+  .demo-controls { display: flex; align-items: center; gap: 16px; }
+
+  .duration {
+    font-size: 0.75rem;
+    color: rgba(245,240,232,0.4);
+    font-family: monospace;
+    min-width: 40px;
+    text-align: center;
+  }
+
+  .play-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1.5px solid var(--gold);
+    color: var(--gold);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s;
+    flex-shrink: 0;
+  }
+  .play-btn:hover, .play-btn.playing {
+    background: var(--gold);
+    color: var(--ink);
+  }
+  .play-btn svg { width: 18px; height: 18px; }
+
+  .waveform-container {
+    width: 140px;
+    height: 36px;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+  .waveform-bar {
+    flex: 1;
+    background: rgba(201,168,76,0.25);
+    border-radius: 1px;
+    transition: background 0.1s;
+  }
+  .waveform-bar.played { background: var(--gold); }
+
+  audio { display: none; }
+
+  .about-text {
+    font-size: 1.05rem;
+    line-height: 1.9;
+    color: rgba(245,240,232,0.75);
+    font-weight: 300;
+    max-width: 620px;
+  }
+  .about-text strong { color: var(--cream); font-weight: 600; }
+
+  .skills-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+  .skill-tag {
+    padding: 6px 16px;
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 100px;
+    font-size: 0.78rem;
+    color: var(--gold);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  footer {
+    text-align: center;
+    padding: 40px;
+    border-top: 1px solid rgba(245,240,232,0.08);
+    font-size: 0.75rem;
+    color: rgba(245,240,232,0.25);
+  }
+
+  .no-demos-msg {
+    text-align: center;
+    padding: 40px;
+    color: rgba(245,240,232,0.3);
+    font-size: 0.9rem;
+    border: 1px dashed rgba(245,240,232,0.15);
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+<!-- EDITOR PANEL -->
+<button id="editor-toggle" onclick="toggleEditor()">✏️ ערוך את האתר</button>
+
+<div id="editor-panel">
+  <div class="editor-title">✏️ עריכת האתר</div>
+
+  <!-- PERSONAL INFO -->
+  <div class="editor-section">
+    <div class="editor-section-title">פרטים אישיים</div>
+
+    <div class="field-group">
+      <label>השם שלך (שם פרטי)</label>
+      <input type="text" id="e-firstname" placeholder="ישראל" oninput="updateName()">
+    </div>
+    <div class="field-group">
+      <label>שם משפחה</label>
+      <input type="text" id="e-lastname" placeholder="ישראלי" oninput="updateName()">
+    </div>
+    <div class="field-group">
+      <label>כותרת / תחומים</label>
+      <input type="text" id="e-tagline" placeholder="קריינות · דיבוב · פרסום" oninput="updateTagline()">
+    </div>
+    <div class="field-group">
+      <label>טלפון</label>
+      <input type="text" id="e-phone" placeholder="050-000-0000" oninput="updateContact()">
+    </div>
+    <div class="field-group">
+      <label>אימייל</label>
+      <input type="text" id="e-email" placeholder="your@email.com" oninput="updateContact()">
+    </div>
+    <div class="field-group">
+      <label>קישור LinkedIn (אופציונלי)</label>
+      <input type="text" id="e-linkedin" placeholder="https://linkedin.com/in/..." oninput="updateContact()">
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <div class="editor-section">
+    <div class="editor-section-title">קצת עליי</div>
+    <div class="field-group">
+      <label>טקסט קצר על עצמך</label>
+      <textarea id="e-about" placeholder="ספר/י על הניסיון שלך, הסגנון, הלקוחות..." oninput="updateAbout()"></textarea>
+    </div>
+  </div>
+
+  <!-- SKILLS -->
+  <div class="editor-section">
+    <div class="editor-section-title">תחומי התמחות (תגיות)</div>
+    <div class="skills-editor">
+      <div class="field-group">
+        <label>הכנס תגיות מופרדות בפסיק</label>
+        <input type="text" id="e-skills" placeholder="פרסום, דיבוב, אנימציה, IVR, עברית" oninput="updateSkills()">
+      </div>
+    </div>
+  </div>
+
+  <!-- DEMOS -->
+  <div class="editor-section">
+    <div class="editor-section-title">דוגמאות קול</div>
+    <div id="demo-editors"></div>
+    <button class="add-demo-btn" onclick="addDemo()">+ הוסף דמו</button>
+  </div>
+
+  <button class="save-btn" onclick="saveToFile()">💾 שמור גרסה מוכנה לאתר</button>
+</div>
+
+<!-- PORTFOLIO -->
+<div id="portfolio">
+  <header>
+    <div class="soundwave-bg" id="headerWave"></div>
+    <div class="name" id="display-name">השם<span id="display-lastname"> שלך</span></div>
+    <div class="tagline" id="display-tagline">קריינות · דיבוב · פרסום</div>
+    <div class="contact-bar" id="display-contact"></div>
+  </header>
+
+  <main>
+    <div class="section-label">דוגמאות קול</div>
+    <div class="demo-grid" id="demo-grid">
+      <div class="no-demos-msg">לחץ על "ערוך את האתר" ← "הוסף דמו" כדי להתחיל</div>
+    </div>
+
+    <div class="section-label">קצת עליי</div>
+    <p class="about-text" id="display-about">הוסף טקסט עליך בלוח העריכה משמאל.</p>
+    <div class="skills-row" id="display-skills"></div>
+  </main>
+
+  <footer id="display-footer">© 2025 השם שלך · כל הזכויות שמורות</footer>
+</div>
+
+<script>
+  // ===== STATE =====
+  let demos = [];
+  let demoCounter = 0;
+  let editorOpen = false;
+
+  // ===== EDITOR TOGGLE =====
+  function toggleEditor() {
+    editorOpen = !editorOpen;
+    document.getElementById('editor-panel').classList.toggle('open', editorOpen);
+    document.getElementById('portfolio').classList.toggle('shifted', editorOpen);
+    document.getElementById('editor-toggle').textContent = editorOpen ? '✕ סגור' : '✏️ ערוך את האתר';
+  }
+
+  // ===== LIVE UPDATES =====
+  function updateName() {
+    const first = document.getElementById('e-firstname').value || 'השם';
+    const last = document.getElementById('e-lastname').value || ' שלך';
+    document.getElementById('display-name').innerHTML = first + '<span id="display-lastname"> ' + last + '</span>';
+    document.getElementById('display-footer').textContent = `© 2025 ${first} ${last} · כל הזכויות שמורות`;
+  }
+
+  function updateTagline() {
+    const val = document.getElementById('e-tagline').value || 'קריינות · דיבוב · פרסום';
+    document.getElementById('display-tagline').textContent = val;
+  }
+
+  function updateContact() {
+    const phone = document.getElementById('e-phone').value;
+    const email = document.getElementById('e-email').value;
+    const linkedin = document.getElementById('e-linkedin').value;
+    let html = '';
+    if (phone) html += `<span>📞 <a href="tel:${phone}">${phone}</a></span>`;
+    if (email) html += `<span>✉️ <a href="mailto:${email}">${email}</a></span>`;
+    if (linkedin) html += `<span>🔗 <a href="${linkedin}" target="_blank">LinkedIn</a></span>`;
+    document.getElementById('display-contact').innerHTML = html;
+  }
+
+  function updateAbout() {
+    const val = document.getElementById('e-about').value;
+    document.getElementById('display-about').textContent = val || 'הוסף טקסט עליך בלוח העריכה משמאל.';
+  }
+
+  function updateSkills() {
+    const raw = document.getElementById('e-skills').value;
+    const tags = raw.split(',').map(s => s.trim()).filter(Boolean);
+    const container = document.getElementById('display-skills');
+    container.innerHTML = tags.map(t => `<span class="skill-tag">${t}</span>`).join('');
+  }
+
+  // ===== DEMOS =====
+  function addDemo() {
+    demoCounter++;
+    const id = demoCounter;
+    const demo = { id, title: '', subtitle: '', audioUrl: null, audioName: '' };
+    demos.push(demo);
+    renderDemoEditor(demo);
+    renderAllDemoCards();
+  }
+
+  function renderDemoEditor(demo) {
+    const container = document.getElementById('demo-editors');
+    const div = document.createElement('div');
+    div.className = 'demo-editor-card';
+    div.id = `demo-editor-${demo.id}`;
+    div.innerHTML = `
+      <div class="demo-num">דמו ${demo.id}</div>
+      <div class="field-group">
+        <label>שם הדמו</label>
+        <input type="text" placeholder="פרסומת — מוצרי יוקרה" oninput="updateDemoField(${demo.id},'title',this.value)">
+      </div>
+      <div class="field-group">
+        <label>תיאור קצר</label>
+        <input type="text" placeholder="סגנון חם ומוביל · עברית" oninput="updateDemoField(${demo.id},'subtitle',this.value)">
+      </div>
+      <div class="field-group">
+        <label>קובץ שמע (mp3)</label>
+        <div class="file-upload-area">
+          <input type="file" accept="audio/*" onchange="loadAudioFile(${demo.id}, this)">
+          <span id="file-label-${demo.id}">📁 לחץ לבחירת קובץ mp3</span>
+        </div>
+      </div>
+      <button style="background:transparent;border:1px solid rgba(255,80,80,0.4);color:rgba(255,100,100,0.7);border-radius:4px;padding:6px;font-size:0.75rem;cursor:pointer;font-family:'Heebo',sans-serif;" onclick="removeDemo(${demo.id})">✕ הסר דמו זה</button>
+    `;
+    container.appendChild(div);
+  }
+
+  function updateDemoField(id, field, value) {
+    const demo = demos.find(d => d.id === id);
+    if (demo) {
+      demo[field] = value;
+      renderAllDemoCards();
+    }
+  }
+
+  function loadAudioFile(id, input) {
+    const file = input.files[0];
+    if (!file) return;
+    const demo = demos.find(d => d.id === id);
+    if (!demo) return;
+    demo.audioUrl = URL.createObjectURL(file);
+    demo.audioName = file.name;
+    document.getElementById(`file-label-${id}`).textContent = '✅ ' + file.name;
+    renderAllDemoCards();
+  }
+
+  function removeDemo(id) {
+    demos = demos.filter(d => d.id !== id);
+    const el = document.getElementById(`demo-editor-${id}`);
+    if (el) el.remove();
+    renderAllDemoCards();
+  }
+
+  function renderAllDemoCards() {
+    const grid = document.getElementById('demo-grid');
+    if (demos.length === 0) {
+      grid.innerHTML = '<div class="no-demos-msg">לחץ על "ערוך את האתר" ← "הוסף דמו" כדי להתחיל</div>';
+      return;
+    }
+
+    // Stop any playing audio first
+    document.querySelectorAll('.demo-audio').forEach(a => a.pause());
+
+    grid.innerHTML = demos.map((demo, idx) => `
+      <div class="demo-card">
+        <div class="demo-info">
+          <h3>${demo.title || 'שם הדמו'}</h3>
+          <p>${demo.subtitle || 'תיאור קצר'}</p>
+        </div>
+        <div class="demo-controls">
+          <div class="waveform-container" id="wf${demo.id}"></div>
+          <div class="duration" id="dur${demo.id}">0:00</div>
+          <button class="play-btn" id="btn${demo.id}" onclick="togglePlay(${demo.id})">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <audio class="demo-audio" id="audio${demo.id}" ${demo.audioUrl ? `src="${demo.audioUrl}"` : ''}></audio>
+        </div>
+      </div>
+    `).join('');
+
+    demos.forEach(demo => buildWaveform(demo.id));
+    setupAudioListeners();
+  }
+
+  // ===== AUDIO PLAYER =====
+  const playIcon = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+  const pauseIcon = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+  let currentId = null;
+
+  function togglePlay(id) {
+    const audio = document.getElementById(`audio${id}`);
+    const btn = document.getElementById(`btn${id}`);
+    if (!audio.src && !audio.currentSrc) {
+      alert('אין קובץ שמע לדמו זה — הוסף קובץ בלוח העריכה');
+      return;
+    }
+    if (currentId && currentId !== id) {
+      const prevAudio = document.getElementById(`audio${currentId}`);
+      const prevBtn = document.getElementById(`btn${currentId}`);
+      if (prevAudio) { prevAudio.pause(); prevAudio.currentTime = 0; }
+      if (prevBtn) { prevBtn.innerHTML = playIcon; prevBtn.classList.remove('playing'); }
+      updateWaveform(currentId, 0);
+    }
+    if (audio.paused) {
+      audio.play();
+      btn.innerHTML = pauseIcon;
+      btn.classList.add('playing');
+      currentId = id;
+    } else {
+      audio.pause();
+      btn.innerHTML = playIcon;
+      btn.classList.remove('playing');
+      currentId = null;
+    }
+  }
+
+  function setupAudioListeners() {
+    demos.forEach(demo => {
+      const audio = document.getElementById(`audio${demo.id}`);
+      if (!audio) return;
+      audio.ontimeupdate = () => {
+        if (audio.duration) {
+          updateWaveform(demo.id, audio.currentTime / audio.duration);
+          document.getElementById(`dur${demo.id}`).textContent = formatTime(audio.currentTime);
+        }
+      };
+      audio.onended = () => {
+        const btn = document.getElementById(`btn${demo.id}`);
+        if (btn) { btn.innerHTML = playIcon; btn.classList.remove('playing'); }
+        updateWaveform(demo.id, 0);
+        if (demo._durId) document.getElementById(`dur${demo.id}`).textContent = '0:00';
+        currentId = null;
+      };
+      audio.onloadedmetadata = () => {
+        document.getElementById(`dur${demo.id}`).textContent = formatTime(audio.duration);
+      };
+    });
+  }
+
+  function buildWaveform(id) {
+    const container = document.getElementById(`wf${id}`);
+    if (!container) return;
+    container.innerHTML = '';
+    const bars = 28;
+    for (let i = 0; i < bars; i++) {
+      const h = 20 + Math.random() * 65;
+      const bar = document.createElement('div');
+      bar.className = 'waveform-bar';
+      bar.style.height = h + '%';
+      container.appendChild(bar);
+    }
+    container.onclick = (e) => {
+      const rect = container.getBoundingClientRect();
+      const ratio = (e.clientX - rect.left) / rect.width;
+      const audio = document.getElementById(`audio${id}`);
+      if (audio && audio.duration) audio.currentTime = ratio * audio.duration;
+    };
+  }
+
+  function updateWaveform(id, progress) {
+    const bars = document.querySelectorAll(`#wf${id} .waveform-bar`);
+    bars.forEach((bar, i) => {
+      bar.classList.toggle('played', i / bars.length <= progress);
+    });
+  }
+
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60).toString().padStart(2, '0');
+    return m + ':' + s;
+  }
+
+  // ===== HEADER WAVE =====
+  const wave = document.getElementById('headerWave');
+  [20,35,55,40,70,30,60,45,80,35,50,25,65,40,75,30,55,42,68,38].forEach((h, i) => {
+    const s = document.createElement('span');
+    s.style.height = h + 'px';
+    s.style.animationDelay = (i * 0.07) + 's';
+    wave.appendChild(s);
+  });
+
+  // ===== SAVE =====
+  function saveToFile() {
+    const first = document.getElementById('e-firstname').value || 'השם';
+    const last = document.getElementById('e-lastname').value || 'שלך';
+    const tagline = document.getElementById('e-tagline').value || 'קריינות · דיבוב · פרסום';
+    const phone = document.getElementById('e-phone').value;
+    const email = document.getElementById('e-email').value;
+    const linkedin = document.getElementById('e-linkedin').value;
+    const about = document.getElementById('e-about').value || '';
+    const skillsRaw = document.getElementById('e-skills').value;
+    const skills = skillsRaw.split(',').map(s => s.trim()).filter(Boolean);
+
+    let contactHtml = '';
+    if (phone) contactHtml += `<span>📞 <a href="tel:${phone}">${phone}</a></span>`;
+    if (email) contactHtml += `<span>✉️ <a href="mailto:${email}">${email}</a></span>`;
+    if (linkedin) contactHtml += `<span>🔗 <a href="${linkedin}" target="_blank">LinkedIn</a></span>`;
+
+    const demosHtml = demos.map((d, idx) => `
+    <div class="demo-card">
+      <div class="demo-info">
+        <h3>${d.title || 'דמו ' + (idx+1)}</h3>
+        <p>${d.subtitle || ''}</p>
+      </div>
+      <div class="demo-controls">
+        <div class="waveform-container" id="wf${idx+1}"></div>
+        <div class="duration" id="dur${idx+1}">0:00</div>
+        <button class="play-btn" id="btn${idx+1}" onclick="togglePlay('audio${idx+1}','btn${idx+1}','wf${idx+1}','dur${idx+1}')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <audio id="audio${idx+1}" src="demos/${d.audioName || 'demo'+(idx+1)+'.mp3'}"></audio>
+      </div>
+    </div>`).join('\n');
+
+    const skillTagsHtml = skills.map(s => `<span class="skill-tag">${s}</span>`).join('\n    ');
+
+    const html = `<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${first} ${last} — קריינות</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Heebo:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#1a1208; --cream:#f5f0e8; --gold:#c9a84c; }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--ink);color:var(--cream);font-family:'Heebo',sans-serif;min-height:100vh;}
+  header{padding:60px 40px 40px;border-bottom:1px solid rgba(201,168,76,0.3);display:flex;flex-direction:column;align-items:flex-end;position:relative;}
+  .soundwave-bg{position:absolute;left:0;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:3px;padding:0 40px;opacity:0.15;}
+  .soundwave-bg span{display:block;width:3px;background:var(--gold);border-radius:2px;animation:wave 1.4s ease-in-out infinite;}
+  @keyframes wave{0%,100%{transform:scaleY(1)}50%{transform:scaleY(0.3)}}
+  .name{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,6vw,5rem);font-weight:900;line-height:1;color:var(--cream);letter-spacing:-1px;}
+  .name span{color:var(--gold);}
+  .tagline{font-size:0.95rem;font-weight:300;color:rgba(245,240,232,0.6);margin-top:8px;letter-spacing:3px;text-transform:uppercase;}
+  .contact-bar{display:flex;gap:24px;margin-top:20px;font-size:0.85rem;color:rgba(245,240,232,0.5);flex-wrap:wrap;justify-content:flex-end;}
+  .contact-bar a{color:var(--gold);text-decoration:none;}
+  main{max-width:900px;margin:0 auto;padding:60px 40px;}
+  .section-label{font-size:0.7rem;letter-spacing:5px;text-transform:uppercase;color:var(--gold);margin-bottom:32px;display:flex;align-items:center;gap:16px;}
+  .section-label::after{content:'';flex:1;height:1px;background:rgba(201,168,76,0.3);}
+  .demo-grid{display:grid;gap:16px;margin-bottom:70px;}
+  .demo-card{background:rgba(245,240,232,0.04);border:1px solid rgba(245,240,232,0.1);border-radius:4px;padding:24px 28px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:20px;transition:border-color 0.3s,background 0.3s;}
+  .demo-card:hover{border-color:rgba(201,168,76,0.4);background:rgba(245,240,232,0.07);}
+  .demo-info h3{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--cream);margin-bottom:4px;}
+  .demo-info p{font-size:0.8rem;color:rgba(245,240,232,0.45);font-weight:300;}
+  .demo-controls{display:flex;align-items:center;gap:16px;}
+  .duration{font-size:0.75rem;color:rgba(245,240,232,0.4);font-family:monospace;min-width:40px;text-align:center;}
+  .play-btn{width:48px;height:48px;border-radius:50%;background:transparent;border:1.5px solid var(--gold);color:var(--gold);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.25s;flex-shrink:0;}
+  .play-btn:hover,.play-btn.playing{background:var(--gold);color:var(--ink);}
+  .play-btn svg{width:18px;height:18px;}
+  .waveform-container{width:140px;height:36px;cursor:pointer;display:flex;align-items:center;gap:2px;}
+  .waveform-bar{flex:1;background:rgba(201,168,76,0.25);border-radius:1px;}
+  .waveform-bar.played{background:var(--gold);}
+  audio{display:none;}
+  .about-text{font-size:1.05rem;line-height:1.9;color:rgba(245,240,232,0.75);font-weight:300;max-width:620px;white-space:pre-line;}
+  .skills-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px;}
+  .skill-tag{padding:6px 16px;border:1px solid rgba(201,168,76,0.4);border-radius:100px;font-size:0.78rem;color:var(--gold);letter-spacing:1px;text-transform:uppercase;}
+  footer{text-align:center;padding:40px;border-top:1px solid rgba(245,240,232,0.08);font-size:0.75rem;color:rgba(245,240,232,0.25);}
+</style>
+</head>
+<body>
+<header>
+  <div class="soundwave-bg" id="headerWave"></div>
+  <div class="name">${first}<span> ${last}</span></div>
+  <div class="tagline">${tagline}</div>
+  <div class="contact-bar">${contactHtml}</div>
+</header>
+<main>
+  <div class="section-label">דוגמאות קול</div>
+  <div class="demo-grid">${demosHtml}</div>
+  <div class="section-label">קצת עליי</div>
+  <p class="about-text">${about}</p>
+  <div class="skills-row">${skillTagsHtml}</div>
+</main>
+<footer>© 2025 ${first} ${last} · כל הזכויות שמורות</footer>
+<script>
+  const pI='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+  const pA='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+  let cur=null,curBtn=null;
+  function togglePlay(aId,bId,wId,dId){
+    const a=document.getElementById(aId),b=document.getElementById(bId);
+    if(cur&&cur!==a){cur.pause();cur.currentTime=0;curBtn.innerHTML=pI;curBtn.classList.remove('playing');updateWF(cur._wf,0);}
+    if(a.paused){a.play();b.innerHTML=pA;b.classList.add('playing');cur=a;curBtn=b;a._wf=wId;a._dur=dId;}
+    else{a.pause();b.innerHTML=pI;b.classList.remove('playing');}
+  }
+  function updateWF(wId,prog){
+    document.querySelectorAll('#'+wId+' .waveform-bar').forEach((bar,i,all)=>{
+      bar.classList.toggle('played',i/all.length<=prog);
+    });
+  }
+  function fmt(s){return Math.floor(s/60)+':'+Math.floor(s%60).toString().padStart(2,'0');}
+  document.querySelectorAll('audio').forEach(a=>{
+    a.ontimeupdate=()=>{if(a.duration){updateWF(a._wf,a.currentTime/a.duration);document.getElementById(a._dur).textContent=fmt(a.currentTime);}};
+    a.onended=()=>{const b=document.getElementById(a.id.replace('audio','btn'));if(b){b.innerHTML=pI;b.classList.remove('playing');}updateWF(a._wf,0);cur=null;};
+    a.onloadedmetadata=()=>{document.getElementById(a.id.replace('audio','dur')).textContent=fmt(a.duration);};
+  });
+  const wave=document.getElementById('headerWave');
+  [20,35,55,40,70,30,60,45,80,35,50,25,65,40,75,30,55,42,68,38].forEach((h,i)=>{
+    const s=document.createElement('span');s.style.height=h+'px';s.style.animationDelay=(i*0.07)+'s';wave.appendChild(s);
+  });
+  document.querySelectorAll('.waveform-container').forEach(c=>{
+    for(let i=0;i<28;i++){const b=document.createElement('div');b.className='waveform-bar';b.style.height=(20+Math.random()*65)+'%';c.appendChild(b);}
+    c.onclick=e=>{const r=c.getBoundingClientRect();const ratio=(e.clientX-r.left)/r.width;const a=document.getElementById(c.id.replace('wf','audio'));if(a&&a.duration)a.currentTime=ratio*a.duration;};
+  });
+<\/script>
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'index.html';
+    a.click();
+    URL.revokeObjectURL(url);
+
+    setTimeout(() => {
+      alert(`✅ הקובץ index.html ירד למחשב שלך!\n\nכדי לפרוס לאתר חינמי:\n1. העלה את index.html ל-GitHub\n2. צור תיקיית "demos" והעלה לתוכה את קבצי ה-mp3\n   (בדיוק באותם שמות שהגדרת)\n3. הפעל GitHub Pages בהגדרות\n\nהאתר שלך יהיה חי! 🎙️`);
+    }, 500);
+  }
+</script>
+</body>
+</html>`;
